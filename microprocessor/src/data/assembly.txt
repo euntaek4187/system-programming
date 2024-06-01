@@ -1,0 +1,24 @@
+Main:
+  MOVC r0, #0
+  STA @sum, r0
+  MOVC r0, #2
+  STA @count, r0
+  MOVC r0, #0
+  STA @i, r0
+  MOVC r0, #1
+  JMP Loop_start
+Loop_start:
+	LDA r1, @i
+	LDA r2, @count
+	CMP r1, r2
+	JGE Loop_end
+	LDA r3, @sum
+	ADD r3, r1
+	STA @sum, r3
+	ADD r1, r0
+	STA @i, r1
+	JMP Loop_start
+Loop_end:
+	LDA r3, @sum
+	HALT
+	
