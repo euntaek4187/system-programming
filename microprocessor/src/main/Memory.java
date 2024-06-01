@@ -10,6 +10,7 @@ public class Memory {
     private final static int DATA_MEMORY_START = 1024;
     private final static int STACK_MEMORY_START = 2048;
     private final static int MEMORY_SIZE = 4096;
+    private int dataSegmentSize; // 이건 파일 읽는 것 기반으로 다시 수정해야할 듯
     public Memory(String filePath) {
         try {
 			scanner = new Scanner(new File(filePath));
@@ -19,6 +20,7 @@ public class Memory {
     }
     public void initialize() {
         for (int i = 0; i < MEMORY_SIZE; i++) memory.add(0);
+        this.dataSegmentSize = 3;
     }
     public ArrayList<Integer> getMemory(){
     	return memory;
@@ -60,5 +62,8 @@ public class Memory {
     }
     public int getStackSegmentStart() {
     	return STACK_MEMORY_START;
+    }
+    public int getDataSegmentSize() {
+    	return dataSegmentSize;
     }
 }

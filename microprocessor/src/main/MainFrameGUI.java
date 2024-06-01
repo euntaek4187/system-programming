@@ -26,11 +26,10 @@ public class MainFrameGUI extends JFrame {
 	public JPanel panel4;
 	public JPanel panel5;
 	// attribute
-	JTextArea instructionField;
+	JTextArea instructionArea;
 	JTable codeSegmentTable;
-	JTextArea dataSegmentField;
-	JTextArea stackSegmentField;
-
+	JTextArea dataSegmentArea;
+	JTextArea stackSegmentArea;
 	JTextArea explanationTextArea;
 	public JButton button;
 	ArrayList<JTextField> registerTextField;
@@ -45,6 +44,7 @@ public class MainFrameGUI extends JFrame {
         this.setLayout(new BorderLayout());
         microprocessor.initialize();
         this.memorySlot = memory.getMemory();
+        
         // main source settings
         panel1 = new JPanel();
         panel2 = new JPanel(new GridLayout(CPU.ERegisters.values().length, 2));
@@ -69,30 +69,29 @@ public class MainFrameGUI extends JFrame {
         }
         // panel3
         panel3.setBorder(BorderFactory.createTitledBorder("Explanation Info"));
-        explanationTextArea = new JTextArea(5, 80); // 나중에 에러날 수도 -> 재확인
+        explanationTextArea = new JTextArea(7, 80); // 나중에 에러날 수도 -> 재확인
         panel3.add(explanationTextArea);
 
         // panel4
         panel4.add(new JLabel("test"));
         panel4.add(new JLabel("test"));
 
-
         // panel5
         JPanel panel5_1 = new JPanel(new GridLayout(1, 4));
         JPanel panel5_2 = new JPanel(new GridLayout(1, 4));
         
-        this.instructionField = new JTextArea(20, 10); // 부모영역 다 차지하고 있음. 확인 필요.. 안해도 괜찮나?
-        this.instructionField.setBorder(BorderFactory.createTitledBorder(""));
+        this.instructionArea = new JTextArea(20, 10); // 부모영역 다 차지하고 있음. 확인 필요.. 안해도 괜찮나?
+        this.instructionArea.setBorder(BorderFactory.createTitledBorder(""));
         
         this.codeSegmentTable = new JTable(new DefaultTableModel(new Object[]{"Code Segment"}, 0));
         this.codeSegmentTable.setBorder(BorderFactory.createTitledBorder(""));
         this.codeSegmentTable.setShowGrid(true);
         this.codeSegmentTable.setGridColor(Color.BLACK);
 
-        this.dataSegmentField = new JTextArea(20, 10);
-        this.dataSegmentField.setBorder(BorderFactory.createTitledBorder(""));
-        this.stackSegmentField = new JTextArea(20,10);
-        this.stackSegmentField.setBorder(BorderFactory.createTitledBorder(""));
+        this.dataSegmentArea = new JTextArea(20, 10);
+        this.dataSegmentArea.setBorder(BorderFactory.createTitledBorder(""));
+        this.stackSegmentArea = new JTextArea(20,10);
+        this.stackSegmentArea.setBorder(BorderFactory.createTitledBorder(""));
 
         
         panel5.setBorder(BorderFactory.createTitledBorder("Memory Info"));
@@ -102,10 +101,12 @@ public class MainFrameGUI extends JFrame {
         panel5_1.add(new JLabel("Stack Segment"));
         
         JScrollPane scrollPane = new JScrollPane(codeSegmentTable);
-        panel5_2.add(instructionField);
+        JScrollPane scrollPane2 = new JScrollPane(dataSegmentArea);
+
+        panel5_2.add(instructionArea);
         panel5_2.add(scrollPane);
-        panel5_2.add(dataSegmentField);
-        panel5_2.add(stackSegmentField);
+        panel5_2.add(scrollPane2);
+        panel5_2.add(stackSegmentArea);
 
         panel5.add(panel5_1, BorderLayout.NORTH);
         panel5.add(panel5_2, BorderLayout.CENTER);
@@ -122,6 +123,7 @@ public class MainFrameGUI extends JFrame {
 		updateExplanation();
 		updateInstructionState();
 		updateCodeSegmentState();
+		updateDataSegmentState();
 	}
 	private void nextBtn() {
 		microprocessor.nextStep();
@@ -129,6 +131,7 @@ public class MainFrameGUI extends JFrame {
 		updateExplanation();
 		updateInstructionState();
 		updateCodeSegmentState();
+		updateDataSegmentState();
 		updateStackSegmentState();
 	}
 	public void updateExplanation() {
@@ -140,13 +143,22 @@ public class MainFrameGUI extends JFrame {
 	        CPU.ERegisters register = CPU.ERegisters.values()[i];
 	        if (register == CPU.ERegisters.eIR) {
 	            textField.setText(String.format("0x%08X", this.microprocessor.getCPU().get(register)));
+	        } else if(register == CPU.ERegisters.eMAR || register == CPU.ERegisters.eMBR) {
+	        	String data = Integer.toString(this.microprocessor.getCPU().get(register));
+	        	if(data.length() >= 8) {
+		            textField.setText(String.format("0x%08X", this.microprocessor.getCPU().get(register)));
+				} else if (data.length() >= 4) {
+		            textField.setText(String.format("0x%04X", this.microprocessor.getCPU().get(register)));
+				} else {
+		            textField.setText(String.valueOf(this.microprocessor.getCPU().get(register)));
+				}
 	        } else {
 	            textField.setText(String.valueOf(this.microprocessor.getCPU().get(register)));
 	        }
 	    }
 	}
 	private void updateInstructionState() {
-		this.instructionField.setText(String.format("0x%08X", this.cpu.get(CPU.ERegisters.eIR)));
+		this.instructionArea.setText(String.format("0x%08X", this.cpu.get(CPU.ERegisters.eIR)));
 	}
 	private void updateCodeSegmentState() {
 	    DefaultTableModel model = (DefaultTableModel) codeSegmentTable.getModel();
@@ -159,11 +171,19 @@ public class MainFrameGUI extends JFrame {
 	        codeSegmentTable.changeSelection(presentInstruction, 0, false, false);
 	    }
 	}
+	private void updateDataSegmentState() { // 이건 파일 읽는 것 기반으로 다시 수정해야할 듯
+		String dataState = "";
+		int dataSegmentStart = memory.getDataSegmentStart();
+		for (int i = dataSegmentStart; i < dataSegmentStart+memory.getDataSegmentSize(); i++) {
+			dataState += String.format("0x%04X", i)+": "+this.memorySlot.get(i)+ "\n";
+		}
+		this.dataSegmentArea.setText(dataState);
+	}
 	private void updateStackSegmentState() {
 		String stackState = "";
 		for (int i = memory.getStackSegmentStart(); memorySlot.get(i) != 0; i++) {
 			stackState += this.memorySlot.get(i)+ "\n";
 		}
-		this.stackSegmentField.setText(stackState);
+		this.stackSegmentArea.setText(stackState);
 	}
 }
