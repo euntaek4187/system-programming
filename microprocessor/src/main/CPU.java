@@ -12,6 +12,16 @@ public class CPU {
     private int processNum;
     private Map<ERegisters, Integer> processData;
     private ArrayList<String> processExplanations;
+    public int getConstant() {
+		return constant;
+	}
+	private int opCode;
+    private int operand1;
+    private int operand2;
+    private int constant;
+    private int storeAddress;
+    private int storeOperand2;
+    private int labelAddress;
     // main
     public enum EDeviceId {
         eCpu, eMemory,
@@ -42,19 +52,38 @@ public class CPU {
     	this.processNum = 0;
     	this.processData = new HashMap<>();
     	this.processExplanations = new ArrayList<>();
+    	resetValues();
     }
-    public void associate(Bus bus) {
+    private void resetValues() {
+    	this.opCode=-1;
+        this.operand1=-1;
+        this.operand2=-1;
+        this.constant=-1;
+        this.storeAddress=-1;
+        this.storeOperand2=-1;
+        this.labelAddress=-1;
+	}
+	public void associate(Bus bus) {
         this.bus = bus;
     }
     public void initialize() {
         registers[ERegisters.ePC.ordinal()] = 0;
     }
-    public int getOpcodeNum(String instruction) { return EOpcode.valueOf(instruction).ordinal(); }
-    public String getExplanation() {return explanation;}
-    public int get(ERegisters eRegister) { return registers[eRegister.ordinal()]; }
-    private void set(ERegisters eRegister, int value) {
-    	registers[eRegister.ordinal()] = value;
+    public EOpcode getOpcodeByIndex(int index) {
+        if (index < 0 || index >= EOpcode.values().length) {
+            throw new IndexOutOfBoundsException("Invalid index for EOpcode: " + index);
+        }
+        return EOpcode.values()[index];
     }
+    public ERegisters getERegisterByIndex(int index) {
+        if (index < 0 || index >= ERegisters.values().length) {
+            throw new IndexOutOfBoundsException("Invalid index for ERegisters: " + index);
+        }
+        return ERegisters.values()[index];
+    }
+    public int getOpcodeNum(String instruction) { return EOpcode.valueOf(instruction).ordinal(); }
+    public int get(ERegisters eRegister) { return registers[eRegister.ordinal()]; }
+    private void set(ERegisters eRegister, int value) {registers[eRegister.ordinal()] = value;}
     private void setZero(boolean bResult) {
         if (bResult) this.registers[ERegisters.eStatus.ordinal()] |= EStatus.eZero.getNSet();
         else this.registers[ERegisters.eStatus.ordinal()] &= EStatus.eZero.getNClear();
@@ -65,7 +94,15 @@ public class CPU {
         else this.registers[ERegisters.eStatus.ordinal()] &= EStatus.eSign.getNClear();
     }
     private boolean getSign() { return (this.registers[ERegisters.eStatus.ordinal()] & EStatus.eSign.getNGet()) != 0; }
+    public String getExplanation() {return explanation;}
+	public int getStoreAddress() {return storeAddress;}
+	public int getStoreOperand2() {return storeOperand2;}
+	public int getOpCode() {return opCode;}
+	public int getOperand1() {return operand1;}
+	public int getOperand2() {return operand2;}
+	public int getLabelAddress() {return labelAddress;}
     public void fetch() {
+    	resetValues();
         this.explanation = "";
         showExplanation("[-----------------------fetch-----------------------]");
         int address = get(ERegisters.ePC);
@@ -86,45 +123,57 @@ public class CPU {
         this.explanation = "";
     	showExplanation("[------------------Decode & Execute-----------------]");
         int instruction = get(ERegisters.eIR);
-        int opCode = (instruction & 0xFF000000) >>> 24;
-        int operand1 = (instruction & 0x00FF0000) >>> 16;
-        int operand2 = (instruction & 0x0000FF00) >>> 8;
-        int value = instruction & 0x0000FFFF;
-        int storeAddress = (instruction & 0x00FFFF00) >>> 8;
-        int storeOperand2 = (instruction & 0x000000FF);
-        int labelAddress = (instruction & 0x00FF0000) >>> 16;
+        this.opCode = (instruction & 0xFF000000) >>> 24;
         switch (EOpcode.values()[opCode]) {
             case MOV:
+                this.operand1 = (instruction & 0x00FF0000) >>> 16;
+                this.operand2 = (instruction & 0x0000FF00) >>> 8;
                 mov(ERegisters.values()[operand1], ERegisters.values()[operand2]);
                 break;
             case MOVC:
-                movc(ERegisters.values()[operand1], value);
+                this.operand1 = (instruction & 0x00FF0000) >>> 16;
+                this.constant = instruction & 0x0000FFFF;
+                movc(ERegisters.values()[operand1], constant);
                 break;
             case LDA:
-                lda(ERegisters.values()[operand1], value);
+                this.operand1 = (instruction & 0x00FF0000) >>> 16;
+                this.constant = instruction & 0x0000FFFF;
+                lda(ERegisters.values()[operand1], constant);
                 break;
             case STA:
+                this.storeAddress = (instruction & 0x00FFFF00) >>> 8;
+                this.storeOperand2 = (instruction & 0x000000FF);
                 sta(storeAddress, ERegisters.values()[storeOperand2]);
                 break;
             case ADD:
+            	this.operand1 = (instruction & 0x00FF0000) >>> 16;
+                this.operand2 = (instruction & 0x0000FF00) >>> 8;
                 add(ERegisters.values()[operand1], ERegisters.values()[operand2]);
                 break;
             case CMP:
+            	this.operand1 = (instruction & 0x00FF0000) >>> 16;
+                this.operand2 = (instruction & 0x0000FF00) >>> 8;
                 cmp(ERegisters.values()[operand1], ERegisters.values()[operand2]);
                 break;
             case CMPC:
-                cmpc(ERegisters.values()[operand1], value);
+            	this.operand1 = (instruction & 0x00FF0000) >>> 16;
+                this.constant = instruction & 0x0000FFFF;
+                cmpc(ERegisters.values()[operand1], constant);
                 break;
             case JEQ:
+                this.labelAddress = (instruction & 0x00FF0000) >>> 16;
                 jeq(labelAddress);
                 break;
             case JNE:
+                this.labelAddress = (instruction & 0x00FF0000) >>> 16;
                 jne(labelAddress);
                 break;
             case JGE:
+                this.labelAddress = (instruction & 0x00FF0000) >>> 16;
                 jge(labelAddress);
                 break;
             case JMP:
+                this.labelAddress = (instruction & 0x00FF0000) >>> 16;
                 jmp(labelAddress);
                 break;
             case HALT:
@@ -160,14 +209,15 @@ public class CPU {
             set(ERegisters.ePC, labelAddress - 1);
             this.explanation += ERegisters.ePC+" <- "+(labelAddress - 1)+"\n";
             showExplanation("~JEQ) Jump to line CS+" + labelAddress);
-        }
+        } else showExplanation("~JEQ) Condition is not met. No change occurs.");
     }
     private void jge(int labelAddress) {
         if (getZero() || !getSign()) {
             set(ERegisters.ePC, labelAddress - 1);
             this.explanation += ERegisters.ePC+" <- "+(labelAddress - 1)+"\n";
             showExplanation("~JGE) Jump to line : CS+" + labelAddress);
-        }
+        } else showExplanation("~JGE) Condition is not met. No change occurs.");
+
     }
     private void jmp(int labelAddress) {
         set(ERegisters.ePC, labelAddress - 1);
@@ -179,7 +229,7 @@ public class CPU {
             set(ERegisters.ePC, labelAddress - 1);
             this.explanation += ERegisters.ePC+" <- "+(labelAddress - 1)+"\n";
             showExplanation("~JNE) Jump to line : CS+" + labelAddress);
-        }
+        }else showExplanation("~JNE) Condition is not met. No change occurs.");
     }
     private void mov(ERegisters eTarget, ERegisters eSource) {
         int sourceValue = get(eSource);

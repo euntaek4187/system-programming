@@ -33,7 +33,7 @@ public class MainFrameGUI extends JFrame {
 	JTextArea explanationTextArea;
 	public JButton button;
 	ArrayList<JTextField> registerTextField;
-	
+	// main
 	public MainFrameGUI(MicroProcessor microprocessor) {
 		// basic  settings
 		this.microprocessor = microprocessor;
@@ -42,21 +42,23 @@ public class MainFrameGUI extends JFrame {
 		this.setSize(1000, 600);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout());
+        this.setTitle("60221320 - Choi Eun Tack - Computer Simulation");
         microprocessor.initialize();
         this.memorySlot = memory.getMemory();
         
         // main source settings
-        panel1 = new JPanel();
+        panel1 = new JPanel(new GridLayout(10, 1));
         panel2 = new JPanel(new GridLayout(CPU.ERegisters.values().length, 2));
         panel3 = new JPanel();
         panel4 = new JPanel(new GridLayout(4, 1));
         panel5 = new JPanel(new BorderLayout());
-        button = new JButton("next");
-        button.addActionListener(e -> nextBtn());
-        panel1.add(button);
         
         // panel1
-        panel1.add(new JLabel("test"));
+        panel1.setBorder(BorderFactory.createTitledBorder("Operating toolbox"));
+        panel1.add(new JLabel("Main Processing"));
+        button = new JButton("nextStep");
+        button.addActionListener(e -> nextBtn());
+        panel1.add(button);
 
         // panel2
         this.registerTextField = new ArrayList<>();
@@ -141,24 +143,33 @@ public class MainFrameGUI extends JFrame {
 	    for (int i = 0; i < CPU.ERegisters.values().length; i++) {
 	        JTextField textField = this.registerTextField.get(i);
 	        CPU.ERegisters register = CPU.ERegisters.values()[i];
-	        if (register == CPU.ERegisters.eIR) {
-	            textField.setText(String.format("0x%08X", this.microprocessor.getCPU().get(register)));
-	        } else if(register == CPU.ERegisters.eMAR || register == CPU.ERegisters.eMBR) {
+	        if (register == CPU.ERegisters.eIR) textField.setText(String.format("0x%08X", this.microprocessor.getCPU().get(register)));
+	        else if(register == CPU.ERegisters.eMAR || register == CPU.ERegisters.eMBR) {
 	        	String data = Integer.toString(this.microprocessor.getCPU().get(register));
-	        	if(data.length() >= 8) {
-		            textField.setText(String.format("0x%08X", this.microprocessor.getCPU().get(register)));
-				} else if (data.length() >= 4) {
-		            textField.setText(String.format("0x%04X", this.microprocessor.getCPU().get(register)));
-				} else {
-		            textField.setText(String.valueOf(this.microprocessor.getCPU().get(register)));
-				}
-	        } else {
-	            textField.setText(String.valueOf(this.microprocessor.getCPU().get(register)));
-	        }
+	        	if(data.length() >= 8) textField.setText(String.format("0x%08X", this.microprocessor.getCPU().get(register)));
+				else if (data.length() >= 4) textField.setText(String.format("0x%04X", this.microprocessor.getCPU().get(register)));
+				else textField.setText(String.valueOf(this.microprocessor.getCPU().get(register)));
+	        } else textField.setText(String.valueOf(this.microprocessor.getCPU().get(register)));
 	    }
 	}
 	private void updateInstructionState() {
-		this.instructionArea.setText(String.format("0x%08X", this.cpu.get(CPU.ERegisters.eIR)));
+		int opCode = cpu.getOpCode();
+	    int operand1 = cpu.getOperand1();
+	    int operand2 = cpu.getOperand2();
+	    int constant = cpu.getConstant();
+	    int storeAddress = cpu.getStoreAddress();
+	    int storeOperand2 = cpu.getStoreOperand2();
+	    int labelAddress = cpu.getLabelAddress();
+	    String settingText = "";
+	    settingText += ""+String.format("0x%08X", this.cpu.get(CPU.ERegisters.eIR))+"\n"+"\n";
+	    if (opCode != -1) settingText += String.format("0x%02X", opCode)+": "+cpu.getOpcodeByIndex(opCode)+"\n";
+	    if (operand1 != -1) settingText += String.format("0x%02X", operand1)+": "+cpu.getERegisterByIndex(operand1)+"\n";
+	    if (operand2 != -1) settingText += String.format("0x%02X", operand2)+": "+cpu.getERegisterByIndex(operand2)+"\n";
+	    if (constant != -1) settingText += String.format("0x%04X", constant)+": "+"value "+constant+"\n";
+	    if (storeAddress != -1) settingText += String.format("0x%04X", storeAddress)+": "+"address "+storeAddress+"\n";
+	    if (storeOperand2 != -1) settingText += String.format("0x%02X", storeOperand2)+": "+cpu.getERegisterByIndex(storeOperand2)+"\n";
+	    if (labelAddress != -1) settingText += String.format("0x%02X", labelAddress)+": "+"CS + "+labelAddress+"\n";
+		this.instructionArea.setText(settingText);
 	}
 	private void updateCodeSegmentState() {
 	    DefaultTableModel model = (DefaultTableModel) codeSegmentTable.getModel();
