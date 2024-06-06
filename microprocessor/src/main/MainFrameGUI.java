@@ -174,7 +174,7 @@ public class MainFrameGUI extends JFrame {
 	private void updateCodeSegmentState() {
 	    DefaultTableModel model = (DefaultTableModel) codeSegmentTable.getModel();
 	    model.setRowCount(0);
-	    for (int i = memory.getCodeSegmentStart(); memorySlot.get(i) != 0; i++) {
+	    for (int i = memory.getCodeSegmentStart(); i < memory.getCodeSegmentSize(); i++) {
 	        model.addRow(new Object[]{i + 1 + ". " + String.format("0x%08X", this.memorySlot.get(i))});
 	    }
 	    int presentInstruction = this.cpu.get(CPU.ERegisters.ePC)-1;
@@ -185,14 +185,14 @@ public class MainFrameGUI extends JFrame {
 	private void updateDataSegmentState() { // 이건 파일 읽는 것 기반으로 다시 수정해야할 듯
 		String dataState = "";
 		int dataSegmentStart = memory.getDataSegmentStart();
-		for (int i = dataSegmentStart; i < dataSegmentStart+memory.getDataSegmentSize(); i++) {
+		for (int i = dataSegmentStart; i < dataSegmentStart+memory.getDataSegmentSize(); i=i+4) {
 			dataState += String.format("0x%04X", i)+": "+this.memorySlot.get(i)+ "\n";
 		}
 		this.dataSegmentArea.setText(dataState);
 	}
 	private void updateStackSegmentState() {
 		String stackState = "";
-		for (int i = memory.getStackSegmentStart(); memorySlot.get(i) != 0; i++) {
+		for (int i = memory.getStackSegmentStart(); memorySlot.get(i) != -1; i++) {
 			stackState += this.memorySlot.get(i)+ "\n";
 		}
 		this.stackSegmentArea.setText(stackState);

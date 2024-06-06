@@ -10,7 +10,11 @@ public class Memory {
     private final static int DATA_MEMORY_START = 1024;
     private final static int STACK_MEMORY_START = 2048;
     private final static int MEMORY_SIZE = 4096;
-    private int dataSegmentSize; // 이건 파일 읽는 것 기반으로 다시 수정해야할 듯
+    private String exeName;
+    private int stackSegmentSize;
+    private int dataSegmentSize;
+    private int dataSize;
+    private int codeSize;
     public Memory(String filePath) {
         try {
 			scanner = new Scanner(new File(filePath));
@@ -19,14 +23,19 @@ public class Memory {
 		}
     }
     public void initialize() {
-        for (int i = 0; i < MEMORY_SIZE; i++) memory.add(0);
-        this.dataSegmentSize = 3;
+        for (int i = 0; i < STACK_MEMORY_START; i++) memory.add(0);
+        for (int i = 0; i < MEMORY_SIZE; i++) memory.add(-1);
     }
     public ArrayList<Integer> getMemory(){
     	return memory;
     }
     public void memeoyLayoutSetting() {
         int address = CODE_SEGMENT_START;
+        this.exeName = scanner.nextLine().trim();
+        this.stackSegmentSize = Integer.parseInt(scanner.nextLine().trim());
+        this.dataSegmentSize = Integer.parseInt(scanner.nextLine().trim());
+        this.dataSize = Integer.parseInt(scanner.nextLine().trim());
+        this.codeSize = Integer.parseInt(scanner.nextLine().trim());
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine().trim();
             if (!line.isEmpty()) {
@@ -42,7 +51,7 @@ public class Memory {
         }
         int value = memory.get(address);
         if (address>=2048) {
-        	memory.set(address, 0);
+        	memory.set(address, -1);
 		}
         return value;
     }
@@ -64,6 +73,9 @@ public class Memory {
     	return STACK_MEMORY_START;
     }
     public int getDataSegmentSize() {
-    	return dataSegmentSize;
+    	return dataSize;
+    }
+    public int getCodeSegmentSize() {
+    	return codeSize;
     }
 }
