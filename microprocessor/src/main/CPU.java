@@ -9,6 +9,7 @@ public class CPU {
     private int stackPointer = 2048;
     // for gui
     private String explanation;
+    private boolean isEnd;
     public int getConstant() {
 		return constant;
 	}
@@ -46,6 +47,7 @@ public class CPU {
     }
     public CPU() {
     	this.explanation = "";
+    	this.isEnd = false;
     	resetValues();
     }
     private void resetValues() {
@@ -89,6 +91,7 @@ public class CPU {
     }
     private boolean getSign() { return (this.registers[ERegisters.eStatus.ordinal()] & EStatus.eSign.getNGet()) != 0; }
     public String getExplanation() {return explanation;}
+    public boolean IsEnd() { return isEnd;}
 	public int getStoreAddress() {return storeAddress;}
 	public int getStoreOperand2() {return storeOperand2;}
 	public int getOpCode() {return opCode;}
@@ -148,11 +151,11 @@ public class CPU {
                 break;
             case zero:
                 this.labelAddress = (instruction & 0x00FF0000) >>> 16;
-                jeq(labelAddress);
+                zero(labelAddress);
                 break;
             case bz:
                 this.labelAddress = (instruction & 0x00FF0000) >>> 16;
-                jeq(labelAddress);
+                bz(labelAddress);
                 break;
             case cmp:
                 this.operand1 = (instruction & 0x00FF0000) >>> 16;
@@ -193,35 +196,46 @@ public class CPU {
                 break;
         }
     }
-    private void showExplanation(String explanation) {
+    private void bz(int labelAddress) {
+        if (getSign()) {
+            set(ERegisters.ePC, labelAddress - 1);
+            this.explanation += ERegisters.ePC + " <- " + (labelAddress - 1) + "\n";
+            showExplanation("~BZ) Sign flag is set. Condition met. Jump to line CS+" + labelAddress);
+        } else {
+            showExplanation("~BZ) Sign flag is not set. Condition not met. No change occurs.");
+        }
+    }
+	private void showExplanation(String explanation) {
 		this.explanation += explanation+"\n";
 		System.out.println(explanation);
 	}
+    private void not(ERegisters eTarget) {
+        int targetValue = get(eTarget);
+        int result = ~targetValue;
+        set(eTarget, result);
+        setZero(result == 0);
+        showExplanation("~NOT) " + eTarget + " <- NOT " + eTarget + " (" + targetValue + "). Result: " + result);
+    }
+
     private void and(ERegisters eTarget, ERegisters eSource) {
         int targetValue = get(eTarget);
         int sourceValue = get(eSource);
         int result = targetValue & sourceValue;
         set(eTarget, result);
         setZero(result == 0);
-        showExplanation("~AND) " + eTarget + " <- " + eTarget + "(" + targetValue + ") & " + eSource + "(" + sourceValue + "). Result: " + result);
+        showExplanation("~AND) " + eTarget + " <- " + eTarget + " (" + targetValue + ") & " + eSource + " (" + sourceValue + "). Result: " + result);
     }
-    private void not(ERegisters eTarget) {
-        int targetValue = get(eTarget);
-        int result = ~targetValue;
-        set(eTarget, result);
-        setZero(result == 0);
-        showExplanation("~NOT) " + eTarget + " <- NOT " + eTarget + "(" + targetValue + "). Result: " + result);
-    }
+
     private void shr(ERegisters eTarget) {
         int targetValue = get(eTarget);
         int result = targetValue >>> 1;
         set(eTarget, result);
         setZero(result == 0);
-        showExplanation("~SHR) " + eTarget + " <- " + eTarget + "(" + targetValue + ") >> 1. Result: " + result);
+        showExplanation("~SHR) " + eTarget + " <- " + eTarget + " (" + targetValue + ") >> 1. Result: " + result);
     }
     private void halt() {
     	showExplanation("~HALT) -----------------system end-----------------");
-        System.exit(0);
+        this.isEnd = true;
     }
 	private void cmp(ERegisters eRegisters, ERegisters eRegisters2) {
         int eRegister = get(eRegisters);
@@ -230,19 +244,19 @@ public class CPU {
         setSign(eRegister < eRegister2);
         showExplanation("~CMP) " + eRegisters+"("+eRegister+")" + " with " + eRegisters2+"("+eRegister2+")");
     }
-    private void jeq(int labelAddress) {
+    private void zero(int labelAddress) {
         if (getZero()) {
             set(ERegisters.ePC, labelAddress - 1);
             this.explanation += ERegisters.ePC+" <- "+(labelAddress - 1)+"\n";
-            showExplanation("~JEQ) Jump to line CS+" + labelAddress);
-        } else showExplanation("~JEQ) Condition is not met. No change occurs.");
+            showExplanation("~ZERO) Condition is met. Jump to line CS+" + labelAddress);
+        } else showExplanation("~ZERO) Condition is not met. No change occurs.");
     }
     private void ge(int labelAddress) {
         if (getZero() || !getSign()) {
             set(ERegisters.ePC, labelAddress - 1);
             this.explanation += ERegisters.ePC+" <- "+(labelAddress - 1)+"\n";
-            showExplanation("~JGE) Jump to line : CS+" + labelAddress);
-        } else showExplanation("~JGE) Condition is not met. No change occurs.");
+            showExplanation("~GE) Condition is met. Jump to line : CS+" + labelAddress);
+        } else showExplanation("~GE) Condition is not met. No change occurs.");
 
     }
     private void jmp(int labelAddress) {
@@ -254,7 +268,7 @@ public class CPU {
         if (!getZero()) {
             set(ERegisters.ePC, labelAddress - 1);
             this.explanation += ERegisters.ePC+" <- "+(labelAddress - 1)+"\n";
-            showExplanation("~JNE) Jump to line : CS+" + labelAddress);
+            showExplanation("~JNE) Condition is met. Jump to line : CS+" + labelAddress);
         }else showExplanation("~JNE) Condition is not met. No change occurs.");
     }
     private void mov(ERegisters eTarget, ERegisters eSource) {
@@ -296,12 +310,6 @@ public class CPU {
         set(eTarget, result);
         this.explanation += eTarget+" <- "+eTarget+"("+targetValue+") + "+eSource+"("+sourceValue+")"+"\n";
         showExplanation("~ADD) " + eSource +"("+sourceValue+")"+ " added to " + eTarget+"("+targetValue+")" + ". New value: " + result);
-    }
-    private void cmpc(ERegisters eRegister, int value) {
-        int registerValue = get(eRegister);
-        setZero(registerValue == value);
-        setSign(registerValue < value);
-        showExplanation("~CMPC) Compare " + eRegister + " with value " + value);
     }
     private void push(ERegisters eRegister) {
         int value = get(eRegister);

@@ -35,22 +35,22 @@ public class MainFrameGUI extends JFrame {
 	ArrayList<JTextField> registerTextField;
 	// main
 	public MainFrameGUI(MicroProcessor microprocessor) {
-		// basic  settings
+		// basic settings
 		this.microprocessor = microprocessor;
 		this.cpu = microprocessor.getCPU();
 		this.memory = microprocessor.getMemory();
 		this.setSize(1000, 600);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout());
-        this.setTitle("60221320 - Choi Eun Tack - Computer Simulation");
+        this.setTitle("60221320 - Choi Eun Taek - Computer Simulation");
         microprocessor.initialize();
         this.memorySlot = memory.getMemory();
         
         // main source settings
         panel1 = new JPanel(new GridLayout(10, 1));
         panel2 = new JPanel(new GridLayout(CPU.ERegisters.values().length, 2));
-        panel3 = new JPanel();
-        panel4 = new JPanel(new GridLayout(4, 1));
+        panel3 = new JPanel(new GridLayout(1, 1));
+        panel4 = new JPanel();
         panel5 = new JPanel(new BorderLayout());
         
         // panel1
@@ -71,18 +71,17 @@ public class MainFrameGUI extends JFrame {
         }
         // panel3
         panel3.setBorder(BorderFactory.createTitledBorder("Explanation Info"));
-        explanationTextArea = new JTextArea(7, 80); // 나중에 에러날 수도 -> 재확인
+        explanationTextArea = new JTextArea(8, 40); // 애매..
         panel3.add(explanationTextArea);
 
         // panel4
-        panel4.add(new JLabel("test"));
-        panel4.add(new JLabel("test"));
+        panel4.add(new JLabel("Computer Simulation"));
 
         // panel5
         JPanel panel5_1 = new JPanel(new GridLayout(1, 4));
         JPanel panel5_2 = new JPanel(new GridLayout(1, 4));
         
-        this.instructionArea = new JTextArea(20, 10); // 부모영역 다 차지하고 있음. 확인 필요.. 안해도 괜찮나?
+        this.instructionArea = new JTextArea(); // 레이아웃매니저가 자동 크기 할당해서 괜찮.
         this.instructionArea.setBorder(BorderFactory.createTitledBorder(""));
         
         this.codeSegmentTable = new JTable(new DefaultTableModel(new Object[]{"Code Segment"}, 0));
@@ -90,9 +89,9 @@ public class MainFrameGUI extends JFrame {
         this.codeSegmentTable.setShowGrid(true);
         this.codeSegmentTable.setGridColor(Color.BLACK);
 
-        this.dataSegmentArea = new JTextArea(20, 10);
+        this.dataSegmentArea = new JTextArea();
         this.dataSegmentArea.setBorder(BorderFactory.createTitledBorder(""));
-        this.stackSegmentArea = new JTextArea(20,10);
+        this.stackSegmentArea = new JTextArea();
         this.stackSegmentArea.setBorder(BorderFactory.createTitledBorder(""));
 
         
@@ -128,6 +127,10 @@ public class MainFrameGUI extends JFrame {
 		updateDataSegmentState();
 	}
 	private void nextBtn() {
+		if (cpu.IsEnd()) {
+			updateExplanation();
+			return;
+		}
 		microprocessor.nextStep();
 		updateCPUState();
 		updateExplanation();

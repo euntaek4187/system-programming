@@ -35,19 +35,4 @@ public class SymbolTable {
 		}
 		return typeBySymbols;
 	}
-//	public void setOffsetUpdate(ArrayList<Symbol> symbolByType) {
-//		for(Symbol symbol : symbolByType) {
-//			System.out.println(symbol.getOffset());
-//			int originOffset = Integer.parseInt(symbol.getOffset());
-//			symbol.setOffset(Integer.toString(originOffset+3));
-//		}
-//	}
-//	public void setOffsetUpdate(int size, ArrayList<Symbol> symbolByType) {
-//		for(int i = 0; i>size; i++) {
-//			
-//		}
-//		for(int i = 0; i < symbols.size(); i++) {
-//			
-//		}
-//	}
 }

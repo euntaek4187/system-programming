@@ -6,4 +6,5 @@
  *
  */
 module Assembler {
+	requires java.desktop;
 }

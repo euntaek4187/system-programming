@@ -11,6 +11,7 @@ public class Main {
 		main.finish();
 	}
 	private Assembler assembler;
+	
 	public Main() {
 		this.assembler = new Assembler();
 	}
@@ -24,3 +25,6 @@ public class Main {
 		assembler.finish();
 	}
 }
+
+// ver.1 - lex 수정
+// ver.2 - gui 완성
