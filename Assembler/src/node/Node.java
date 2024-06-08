@@ -1,12 +1,9 @@
 package node;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
-
 import codeGenerator.CodeGenerator;
 import lexicalAnalyzer.LexicalAnalyzer;
 import symbolTable.SymbolTable;
-
 public abstract class Node{
 	protected LexicalAnalyzer lexicalAnalyzer;
 	protected SymbolTable symbolTable;

@@ -12,9 +12,7 @@ public class Parser extends Node{
 	public Parser(LexicalAnalyzer lexicalAnalyzer, SymbolTable symbolTable, CodeGenerator codeGenerator) {
 		super(lexicalAnalyzer, symbolTable, codeGenerator);
 	}
-	public void initialize() {
-
-	}
+	public void initialize() {}
 	@Override
 	public String parse(String token) throws Exception{
 		token = this.lexicalAnalyzer.getToken();
@@ -25,9 +23,7 @@ public class Parser extends Node{
 		}
 		throw new Exception();
 	}
-	public Program getProgram() {
-		return program;
-	}
+	public Program getProgram() {return program;}
 	@Override
 	public void generate(BufferedWriter fileWriter) throws IOException {
 		this.codeGenerator.codeGeneration(program);
@@ -35,7 +31,5 @@ public class Parser extends Node{
 	public void associate(CodeGenerator codeGenerator) {
 		this.codeGenerator = codeGenerator;
 	}
-	public void finish() {
-
-	}
+	public void finish() {}
 }

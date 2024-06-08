@@ -16,9 +16,7 @@ public class CodeSegment extends Node{
 		super(lexicalAnalyzer, symbolTable, codeGenerator);
 		this.instructions = new Vector<>();
 	}
-	public void initialize() {
-
-	}
+	public void initialize() {}
 	public Vector<Instruction> getInstructions(){
 		return instructions;
 	}

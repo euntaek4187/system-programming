@@ -8,21 +8,12 @@ import opcode.EKeyword;
 import symbolTable.Symbol;
 import symbolTable.SymbolTable;
 public class HeaderSegment extends Node{
-	private CodeGenerator codeGenerator;
 	private int sizeStack;
 	private int sizeHeap;
 	public HeaderSegment(LexicalAnalyzer lexicalAnalyzer, SymbolTable simbolTable, CodeGenerator codeGenerator) {
 		super(lexicalAnalyzer, simbolTable, codeGenerator);
 	}
-	public void initialize(CodeGenerator codeGenerator) {
-		this.codeGenerator = codeGenerator;
-	}
-	public int getSizeStack() {
-		return sizeStack;
-	}
-	public int getSizeHeap() {
-		return sizeHeap;
-	}
+	public void initialize() {}
 	@Override
 	public String parse(String token) throws Exception {
 		String keyword = lexicalAnalyzer.getToken();

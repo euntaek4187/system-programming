@@ -18,17 +18,9 @@ public class MicroProcessor {
         memory.initialize();
         memory.memeoyLayoutSetting();
     }
-    public void run() {
-        cpu.run();
-    }
-    public void finish() {
-    }
-    public CPU getCPU() {
-    	return cpu;
-    }
-    public Memory getMemory() {
-    	return memory;
-    }
+    public CPU getCPU() {return cpu;}
+    public Memory getMemory() {return memory;}
+    public void finish() {}
     public void nextStep() {
         if (!nextStepCalled) {
             cpu.fetch();

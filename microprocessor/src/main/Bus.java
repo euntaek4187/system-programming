@@ -2,6 +2,7 @@ package main;
 public class Bus {
     private Memory memory;
     public Bus() {}
+	public void initialize() {}
     public void associate(Memory memory) {
         this.memory = memory;
     }
@@ -16,5 +17,4 @@ public class Bus {
             memory.store(address, value);
         }
     }
-	public void initialize() {}
 }

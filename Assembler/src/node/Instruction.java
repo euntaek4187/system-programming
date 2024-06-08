@@ -2,11 +2,8 @@ package node;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Vector;
-
 import codeGenerator.CodeGenerator;
 import lexicalAnalyzer.LexicalAnalyzer;
-import opcode.EOpcode;
-import symbolTable.Symbol;
 import symbolTable.SymbolTable;
 public class Instruction extends Node {
 	ECommand eCommand;
@@ -50,22 +47,24 @@ public class Instruction extends Node {
 			return null;
 		}
 	}
-	public boolean getIsLabel() {
-		return isLabel;
-	}
+	public boolean getIsLabel() {return isLabel;}
 	public Instruction(LexicalAnalyzer lexicalAnalyzer, SymbolTable simbolTable, CodeGenerator codeGenerator) {
 		super(lexicalAnalyzer, simbolTable, codeGenerator);
 	}
 	public void association(Vector<Instruction> instructions) {
 		this.instructions = instructions;
 	}
+    private void updateInstructionOffset() {
+		Instruction instruction = new Instruction(lexicalAnalyzer, symbolTable, codeGenerator);
+		instructions.add(instruction);
+		instructions.add(instruction);
+		instructions.add(instruction);
+	}
 	public void initialize() {
 	}
 	@Override
 	public String parse(String token) throws Exception {
-		if (token.contains(":")) {
-			isLabel = true;
-		}
+		if (token.contains(":")) isLabel = true;
 		this.eCommand = ECommand.fromString(token);
 		String nextToken = null;
 		if (token.contains(":")) {
@@ -78,11 +77,11 @@ public class Instruction extends Node {
 		}
 		if (token.equals(ECommand.eHalt.getText())) {
 			nextToken = this.lexicalAnalyzer.getToken();
-		} else if(token.equals(ECommand.eNot.getText()) || token.equals(ECommand.eShr.getText())) {
+		} else if(token.equals(ECommand.eNot.getText()) || token.equals(ECommand.eShr.getText())|| token.equals(ECommand.ePush.getText())|| token.equals(ECommand.ePop.getText())) {
 			nextToken = this.lexicalAnalyzer.getToken();
 			this.operand1 = nextToken;
 			nextToken = this.lexicalAnalyzer.getToken();
-		} else if (token.equals(ECommand.eGE.getText()) || token.equals(ECommand.eJump.getText())) {
+		} else if (token.equals(ECommand.eGE.getText()) || token.equals(ECommand.eJump.getText()) || token.equals(ECommand.eBZ.getText())|| token.equals(ECommand.eZero.getText())) {
 			nextToken = this.lexicalAnalyzer.getToken();
 			this.label = nextToken;
 			nextToken = this.lexicalAnalyzer.getToken();
@@ -101,20 +100,6 @@ public class Instruction extends Node {
 		}
 		return nextToken;
 	}
-    private void updateInstructionOffset() {
-		Instruction instruction = new Instruction(lexicalAnalyzer, symbolTable, codeGenerator);
-		instructions.add(instruction);
-		instructions.add(instruction);
-		instructions.add(instruction);
-	}
-	public static boolean isConvertibleToInt(String str) {
-        try {
-            Integer.parseInt(str);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
 	public ECommand geteCommand() {
 		return eCommand;
 	}
@@ -139,7 +124,7 @@ public class Instruction extends Node {
 		if(this.opcode == null) {
 		} else if (this.opcode.equals("halt")) {
 			codeGenerator.macroExpansion0operand(this.opcode);
-		} else if(this.opcode.contains("not") || this.opcode.contains("shr")) {
+		} else if(this.opcode.contains("not") || this.opcode.contains("shr")|| this.opcode.contains("push")|| this.opcode.contains("pop")) {
             register = Integer.parseInt(this.operand1.replace("r", "").trim());
 			codeGenerator.macroExpansion1operand(this.opcode, register);
 		} else if (this.opcode.contains("ge") || this.opcode.contains("jump")|| this.opcode.contains("zero")|| this.opcode.contains("bz")) {

@@ -1,8 +1,6 @@
 package main;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
 public class Main {
 	public static void main(String[] args) throws IOException {
 		Main main = new Main();
@@ -11,7 +9,6 @@ public class Main {
 		main.finish();
 	}
 	private Assembler assembler;
-	
 	public Main() {
 		this.assembler = new Assembler();
 	}
@@ -25,6 +22,5 @@ public class Main {
 		assembler.finish();
 	}
 }
-
 // ver.1 - lex 수정
-// ver.2 - gui 완성
+// ver.2 - gui 완성, 코드 깔끔하게 정리, bz &zero 로직 추가

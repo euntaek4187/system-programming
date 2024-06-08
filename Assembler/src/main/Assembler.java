@@ -2,6 +2,7 @@ package main;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import GUI.MainFrameGUI;
 import codeGenerator.CodeGenerator;
 import lexicalAnalyzer.LexicalAnalyzer;
 import parser.Parser;
@@ -13,12 +14,12 @@ public class Assembler {
     private SymbolTable symbolTabel;
     private MainFrameGUI mainFrameGUI;
     private String binaryCodeFile = "binary/codeGeneration.txt";
-    private String assemblyCodeFile = "source/test.txt";
+    private String assemblyCodeFileName = "test1";
     public Assembler() {
     	this.symbolTabel = new SymbolTable();
-    	this.mainFrameGUI = new MainFrameGUI(binaryCodeFile, assemblyCodeFile, symbolTabel);
+    	this.mainFrameGUI = new MainFrameGUI(binaryCodeFile, assemblyCodeFileName, symbolTabel);
     	this.codeGenerator = new CodeGenerator(binaryCodeFile, symbolTabel, this.mainFrameGUI);
-    	this.lexicalAnalyzer = new LexicalAnalyzer("test", this.symbolTabel, this.mainFrameGUI);
+    	this.lexicalAnalyzer = new LexicalAnalyzer(assemblyCodeFileName, this.symbolTabel, this.mainFrameGUI);
     	this.parser = new Parser(this.lexicalAnalyzer, symbolTabel, codeGenerator);
     	this.mainFrameGUI.setVisible(true);
     }

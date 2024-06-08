@@ -1,0 +1,21 @@
+.program test
+	nop
+.header
+	stack 1024
+	heap 1024
+.data
+.code
+	move r0 1024
+	move r1 1048
+	move r2 1001
+	
+	startloop:
+	shr r2
+	not r1
+	shr r0
+	and r0 r2
+	jump startloop
+	
+	exitloop:
+	halt
+.end

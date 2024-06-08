@@ -1,5 +1,6 @@
-package main;
+package GUI;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.Label;
 import java.io.BufferedReader;
@@ -37,15 +38,17 @@ public class MainFrameGUI extends JFrame {
     private JTable symbolJTable;
     private JButton jButton;
     private CountDownLatch latch;
+//	Color backgroundColor = new Color(222, 222, 220);
     public MainFrameGUI(String binaryCodeFile, String assemblyCodeFile, SymbolTable symbolTable) {
         // basic setting
         this.binaryCodeFile = binaryCodeFile;
-        this.assemblyCodeFile = assemblyCodeFile;
+        this.assemblyCodeFile = "source/" + assemblyCodeFile + ".txt";
         this.symbolTable = symbolTable;
         this.setSize(1000, 600);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout());
         this.setTitle("60221320 - Choi Eun Taek - Compiler Simulation");
+
         // main source settings
         this.panel1 = new JPanel();
         this.panel2 = new JPanel();

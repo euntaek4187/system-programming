@@ -33,6 +33,7 @@ public class MainFrameGUI extends JFrame {
 	JTextArea explanationTextArea;
 	public JButton button;
 	ArrayList<JTextField> registerTextField;
+	Color backgroundColor = new Color(207, 207, 207);
 	// main
 	public MainFrameGUI(MicroProcessor microprocessor) {
 		// basic settings
@@ -43,6 +44,7 @@ public class MainFrameGUI extends JFrame {
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout());
         this.setTitle("60221320 - Choi Eun Taek - Computer Simulation");
+        this.getContentPane().setBackground(backgroundColor);
         microprocessor.initialize();
         this.memorySlot = memory.getMemory();
         
@@ -52,6 +54,12 @@ public class MainFrameGUI extends JFrame {
         panel3 = new JPanel(new GridLayout(1, 1));
         panel4 = new JPanel();
         panel5 = new JPanel(new BorderLayout());
+        // set back color
+        panel1.setBackground(backgroundColor);
+        panel2.setBackground(backgroundColor);
+        panel3.setBackground(backgroundColor);
+        panel4.setBackground(backgroundColor);
+        panel5.setBackground(backgroundColor);
         
         // panel1
         panel1.setBorder(BorderFactory.createTitledBorder("Operating toolbox"));
@@ -181,11 +189,9 @@ public class MainFrameGUI extends JFrame {
 	        model.addRow(new Object[]{i + 1 + ". " + String.format("0x%08X", this.memorySlot.get(i))});
 	    }
 	    int presentInstruction = this.cpu.get(CPU.ERegisters.ePC)-1;
-	    if (presentInstruction != -1) {
-	        codeSegmentTable.changeSelection(presentInstruction, 0, false, false);
-	    }
+	    if (presentInstruction != -1) codeSegmentTable.changeSelection(presentInstruction, 0, false, false);
 	}
-	private void updateDataSegmentState() { // 이건 파일 읽는 것 기반으로 다시 수정해야할 듯
+	private void updateDataSegmentState() {
 		String dataState = "";
 		int dataSegmentStart = memory.getDataSegmentStart();
 		for (int i = dataSegmentStart; i < dataSegmentStart+memory.getDataSegmentSize(); i=i+4) {

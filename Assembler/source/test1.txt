@@ -7,7 +7,7 @@
 	sum 4
 	average 4
 	i 4
-	max 10
+	max 4
 .code
 	move r0 0
 	move sum r0

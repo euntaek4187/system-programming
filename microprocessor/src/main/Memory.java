@@ -26,9 +26,6 @@ public class Memory {
         for (int i = 0; i < STACK_MEMORY_START; i++) memory.add(0);
         for (int i = 0; i < MEMORY_SIZE; i++) memory.add(-1);
     }
-    public ArrayList<Integer> getMemory(){
-    	return memory;
-    }
     public void memeoyLayoutSetting() {
         int address = CODE_SEGMENT_START;
         this.exeName = scanner.nextLine().trim();
@@ -63,19 +60,10 @@ public class Memory {
         memory.set(address, value);
         System.out.println("Stored value " + value + " at memory address " + address);
     }
-    public int getCodeSegmentStart() {
-    	return CODE_SEGMENT_START;
-    }
-    public int getDataSegmentStart() {
-    	return DATA_MEMORY_START;
-    }
-    public int getStackSegmentStart() {
-    	return STACK_MEMORY_START;
-    }
-    public int getDataSegmentSize() {
-    	return dataSize;
-    }
-    public int getCodeSegmentSize() {
-    	return codeSize;
-    }
+    public ArrayList<Integer> getMemory(){return memory;}
+    public int getCodeSegmentStart() {return CODE_SEGMENT_START;}
+    public int getDataSegmentStart() {return DATA_MEMORY_START;}
+    public int getStackSegmentStart() {return STACK_MEMORY_START;}
+    public int getDataSegmentSize() {return dataSize;}
+    public int getCodeSegmentSize() {return codeSize;}
 }

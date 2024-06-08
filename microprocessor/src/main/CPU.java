@@ -1,7 +1,4 @@
 package main;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 public class CPU {
     private Bus bus;
     private boolean finished = false;
@@ -10,9 +7,6 @@ public class CPU {
     // for gui
     private String explanation;
     private boolean isEnd;
-    public int getConstant() {
-		return constant;
-	}
 	private int opCode;
     private int operand1;
     private int operand2;
@@ -98,6 +92,7 @@ public class CPU {
 	public int getOperand1() {return operand1;}
 	public int getOperand2() {return operand2;}
 	public int getLabelAddress() {return labelAddress;}
+    public int getConstant() {return constant;}
     public void fetch() {
     	resetValues();
         this.explanation = "";
@@ -111,9 +106,9 @@ public class CPU {
             return;
         }
         set(ERegisters.eMBR, instruction); // MBR에 로드한 값 설정
-        this.explanation += ERegisters.eMBR+" <- "+"("+ERegisters.eMAR+"="+String.format("0x%04X", instruction)+")"+"\n";
+        this.explanation += ERegisters.eMBR+" <- "+"("+ERegisters.eMAR+"="+String.format("0x%08X", instruction)+")"+"\n";
         set(ERegisters.eIR, get(ERegisters.eMBR)); // IR <- MBR
-        this.explanation += ERegisters.eIR+" <- "+ERegisters.eMBR+"("+String.format("0x%04X",get(ERegisters.eMBR))+")"+"\n";
+        this.explanation += ERegisters.eIR+" <- "+ERegisters.eMBR+"("+String.format("0x%08X",get(ERegisters.eMBR))+")"+"\n";
         incrementPC();
     }
     public void decodeAndExecute() {
@@ -201,9 +196,7 @@ public class CPU {
             set(ERegisters.ePC, labelAddress - 1);
             this.explanation += ERegisters.ePC + " <- " + (labelAddress - 1) + "\n";
             showExplanation("~BZ) Sign flag is set. Condition met. Jump to line CS+" + labelAddress);
-        } else {
-            showExplanation("~BZ) Sign flag is not set. Condition not met. No change occurs.");
-        }
+        } else showExplanation("~BZ) Sign flag is not set. Condition not met. No change occurs.");
     }
 	private void showExplanation(String explanation) {
 		this.explanation += explanation+"\n";
@@ -216,7 +209,6 @@ public class CPU {
         setZero(result == 0);
         showExplanation("~NOT) " + eTarget + " <- NOT " + eTarget + " (" + targetValue + "). Result: " + result);
     }
-
     private void and(ERegisters eTarget, ERegisters eSource) {
         int targetValue = get(eTarget);
         int sourceValue = get(eSource);
@@ -225,7 +217,6 @@ public class CPU {
         setZero(result == 0);
         showExplanation("~AND) " + eTarget + " <- " + eTarget + " (" + targetValue + ") & " + eSource + " (" + sourceValue + "). Result: " + result);
     }
-
     private void shr(ERegisters eTarget) {
         int targetValue = get(eTarget);
         int result = targetValue >>> 1;
@@ -257,7 +248,6 @@ public class CPU {
             this.explanation += ERegisters.ePC+" <- "+(labelAddress - 1)+"\n";
             showExplanation("~GE) Condition is met. Jump to line : CS+" + labelAddress);
         } else showExplanation("~GE) Condition is not met. No change occurs.");
-
     }
     private void jmp(int labelAddress) {
         set(ERegisters.ePC, labelAddress - 1);
@@ -330,15 +320,5 @@ public class CPU {
     }
     public boolean isFinished() {
         return finished;
-    }
-    public void run() {
-        while (!finished) {
-        	System.out.println("[————— Execute —————]");
-        	fetch();
-        	if (!finished) {
-        		decodeAndExecute();
-        		System.out.println("");
-        	}	
-        }
     }
 }

@@ -2,10 +2,9 @@ package lexicalAnalyzer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
-import main.MainFrameGUI;
+import GUI.MainFrameGUI;
 import symbolTable.Symbol;
 import symbolTable.SymbolTable;
-
 public class LexicalAnalyzer {
     private String fileName;
     private Scanner scanner;
@@ -13,7 +12,6 @@ public class LexicalAnalyzer {
     private String[] currentTokens;
     private int tokenIndex;
     MainFrameGUI mainFrameGUI;
-
     public LexicalAnalyzer(String fileName, SymbolTable symbolTable, MainFrameGUI mainFrameGUI) {
         this.fileName = fileName;
         this.symbolTable = symbolTable;
@@ -21,11 +19,9 @@ public class LexicalAnalyzer {
         this.currentTokens = new String[0];
         this.tokenIndex = 0;
     }
-
     public void initialize() throws FileNotFoundException {
         this.scanner = new Scanner(new File("source/" + fileName + ".txt"));
     }
-
     public String getToken() {
         while (tokenIndex >= currentTokens.length && scanner.hasNextLine()) {
             String line = scanner.nextLine().trim();
@@ -37,7 +33,6 @@ public class LexicalAnalyzer {
         mainFrameGUI.updateSymbolTabelGUIState(token);
         return token;
     }
-
     private void processLine(String line) {
         tokenIndex = 0;
         if (line.contains(".")) {
@@ -59,13 +54,11 @@ public class LexicalAnalyzer {
         }
         currentTokens = line.split(" ");
     }
-
     public void finalize() {
         if (this.scanner != null) {
             this.scanner.close();
         }
     }
-
     public void finish() {
     }
 }

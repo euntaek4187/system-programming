@@ -8,10 +8,6 @@ public enum EKeyword{
 	eCode(".code"),
 	eEnd(".end");
 	private String text;
-	private EKeyword(String text) {
-		this.text = text;
-	}
-	public String getText() {
-		return this.text;
-	}
+	private EKeyword(String text) {this.text = text;}
+	public String getText() {return this.text;}
 }
