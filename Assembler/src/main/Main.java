@@ -24,3 +24,4 @@ public class Main {
 }
 // ver.1 - lex 수정
 // ver.2 - gui 완성, 코드 깔끔하게 정리, bz &zero 로직 추가
+// ver.3 - initialize()로 코드 분리

@@ -38,13 +38,12 @@ public class MainFrameGUI extends JFrame {
     private JTable symbolJTable;
     private JButton jButton;
     private CountDownLatch latch;
-//	Color backgroundColor = new Color(222, 222, 220);
     public MainFrameGUI(String binaryCodeFile, String assemblyCodeFile, SymbolTable symbolTable) {
         // basic setting
         this.binaryCodeFile = binaryCodeFile;
         this.assemblyCodeFile = "source/" + assemblyCodeFile + ".txt";
         this.symbolTable = symbolTable;
-        this.setSize(1000, 600);
+        this.setSize(1100, 650);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout());
         this.setTitle("60221320 - Choi Eun Taek - Compiler Simulation");
@@ -55,12 +54,22 @@ public class MainFrameGUI extends JFrame {
         this.panel3 = new JPanel();
         this.panel4 = new JPanel();
         this.panel5 = new JPanel(new GridLayout(1, 4));
+
+        // end setting
+        this.add(panel1, BorderLayout.EAST);
+        this.add(panel2, BorderLayout.WEST);
+        this.add(panel3, BorderLayout.SOUTH);
+        this.add(panel4, BorderLayout.NORTH);
+        this.add(panel5, BorderLayout.CENTER);
+    }
+	public void initialize() {
         // panel1
         this.panel1.add(new Label("       "));
         // panel2
         this.panel2.add(new Label("       "));
         // panel3
         this.panel3.add(new Label("       "));
+        
         // panel4
         this.jTextField = new JTextField(10);
         this.jButton = new JButton("Next Step");
@@ -68,6 +77,7 @@ public class MainFrameGUI extends JFrame {
         this.panel4.add(new JLabel("Token: "));
         this.panel4.add(jTextField);
         this.panel4.add(jButton);
+        
         // panel5
         JPanel panel5_1 = new JPanel(new GridLayout(1, 1));
         panel5_1.setBorder(BorderFactory.createTitledBorder("Assembler File"));
@@ -75,12 +85,14 @@ public class MainFrameGUI extends JFrame {
         JScrollPane scrollPane3 = new JScrollPane(assemblyFileArea);
         panel5_1.add(scrollPane3);
         this.panel5.add(panel5_1);
+        
         JPanel panel5_2 = new JPanel(new GridLayout(1, 1));
         panel5_2.setBorder(BorderFactory.createTitledBorder("Exe File"));
         this.exeFileArea = new JTextArea();
         JScrollPane scrollPane2 = new JScrollPane(exeFileArea);
         panel5_2.add(scrollPane2);
         this.panel5.add(panel5_2);
+        
         JPanel panel5_3 = new JPanel(new GridLayout(1, 1));
         panel5_3.setBorder(BorderFactory.createTitledBorder("Symbol Table"));
         this.symbolJTable = new JTable(new DefaultTableModel(
@@ -88,14 +100,10 @@ public class MainFrameGUI extends JFrame {
         JScrollPane scrollPane1 = new JScrollPane(symbolJTable);
         panel5_3.add(scrollPane1);
         this.panel5.add(panel5_3);
-        // end setting
-        this.add(panel1, BorderLayout.EAST);
-        this.add(panel2, BorderLayout.WEST);
-        this.add(panel3, BorderLayout.SOUTH);
-        this.add(panel4, BorderLayout.NORTH);
-        this.add(panel5, BorderLayout.CENTER);
-        setAssemblyFileState();
-    }
+        
+		// start setting
+		setAssemblyFileState();
+	}
 	private void nextTokenClicked() {
         if (latch != null) latch.countDown();
         updateSymbolTableState();
