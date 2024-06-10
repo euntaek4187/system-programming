@@ -30,6 +30,11 @@ public class Instruction extends Node {
 		ePush("push"),
 		ePop("pop"),
 		eGE("ge"),
+		eCall("call"),
+		eRet("ret"),
+		eNewc("newc"),
+		eStar("star"),
+		eLdar("ldar"),
 		eEnd(".end");
 		private String text;
 		private ECommand(String text) {
@@ -75,13 +80,13 @@ public class Instruction extends Node {
 			symbolTable.setTypes(token, "command");
 			this.opcode = eCommand.getText();
 		}
-		if (token.equals(ECommand.eHalt.getText())) {
+		if (token.equals(ECommand.eHalt.getText()) || token.equals(ECommand.eRet.getText())) {
 			nextToken = this.lexicalAnalyzer.getToken();
-		} else if(token.equals(ECommand.eNot.getText()) || token.equals(ECommand.eShr.getText())|| token.equals(ECommand.ePush.getText())|| token.equals(ECommand.ePop.getText())) {
+		} else if(token.equals(ECommand.eNot.getText()) || token.equals(ECommand.eShr.getText())|| token.equals(ECommand.ePush.getText())|| token.equals(ECommand.ePop.getText())|| token.equals(ECommand.eNewc.getText())) {
 			nextToken = this.lexicalAnalyzer.getToken();
 			this.operand1 = nextToken;
 			nextToken = this.lexicalAnalyzer.getToken();
-		} else if (token.equals(ECommand.eGE.getText()) || token.equals(ECommand.eJump.getText()) || token.equals(ECommand.eBZ.getText())|| token.equals(ECommand.eZero.getText())) {
+		} else if (token.equals(ECommand.eGE.getText()) || token.equals(ECommand.eJump.getText()) || token.equals(ECommand.eBZ.getText())|| token.equals(ECommand.eZero.getText())|| token.equals(ECommand.eCall.getText())) {
 			nextToken = this.lexicalAnalyzer.getToken();
 			this.label = nextToken;
 			nextToken = this.lexicalAnalyzer.getToken();
@@ -122,12 +127,15 @@ public class Instruction extends Node {
 		int constant = -1;
 		int variable = -1;
 		if(this.opcode == null) {
-		} else if (this.opcode.equals("halt")) {
+		} else if (this.opcode.equals("halt") || this.opcode.equals("ret")) {
 			codeGenerator.macroExpansion0operand(this.opcode);
+		} else if(this.opcode.contains("newc")) {
+			constant = Integer.parseInt(this.operand1);
+			codeGenerator.macroExpansionConstant(constant);
 		} else if(this.opcode.contains("not") || this.opcode.contains("shr")|| this.opcode.contains("push")|| this.opcode.contains("pop")) {
             register = Integer.parseInt(this.operand1.replace("r", "").trim());
 			codeGenerator.macroExpansion1operand(this.opcode, register);
-		} else if (this.opcode.contains("ge") || this.opcode.contains("jump")|| this.opcode.contains("zero")|| this.opcode.contains("bz")) {
+		} else if (this.opcode.contains("ge") || this.opcode.contains("jump")|| this.opcode.contains("zero")|| this.opcode.contains("bz")|| this.opcode.contains("call")) {
 			codeGenerator.macroExpansionLabelJump(opcode, label);
 		} else if (symbolTable.retrieveSymbol(operand1) != null) { // sta
             variable =  Integer.parseInt(symbolTable.retrieveSymbol(operand1).getOffset()) + 1024;

@@ -17,4 +17,10 @@ public class Bus {
             memory.store(address, value);
         }
     }
+    public int allocate(CPU.EDeviceId deviceId, int size) {
+    	if (deviceId == CPU.EDeviceId.eMemory) {
+    		return memory.allocate(size);
+    	}
+    	return -1;
+    }
 }

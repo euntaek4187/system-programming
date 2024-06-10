@@ -4,17 +4,34 @@
 	stack 1024
 	heap 1024
 .data
+	i 4
+	sum 4
 .code
-	move r0 1024
-	move r1 1048
-	move r2 1001
+	move r0 3
+	move i r0
+	move r0 0
+	move sum r0
 	
 	startloop:
+	move r0 sum
+	move r1 i
+	cmp r0 r1
+	ge exitloop
 	push r0
+	move r1 1
 	push r1
-	pop r3
+	call update
 	pop r0
+	move sum r0
 	jump startloop
+	
+	
+	update:
+	pop r0
+	pop r1
+	add r0 r1
+	push r0
+	ret
 	
 	exitloop:
 	halt

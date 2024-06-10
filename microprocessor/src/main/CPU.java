@@ -1,4 +1,10 @@
 package main;
+
+import java.util.ArrayList;
+
+import main.CPU.EDeviceId;
+import main.CPU.ERegisters;
+
 public class CPU {
     private Bus bus;
     private boolean finished = false;
@@ -19,7 +25,7 @@ public class CPU {
         eCpu, eMemory,
     }
     public enum EOpcode {
-    	halt, lda, sta, add, and, jump, zero, bz, cmp, not, shr, move, movec, push, pop, ge;
+    	halt, lda, sta, add, and, jump, zero, bz, cmp, not, shr, move, movec, push, pop, ge, call, ret, newc, star, ldar;
     }
     enum ERegisters {
         R0, R1, R2, R3, eMAR, eMBR, ePC, eIR, eAC, eStatus,
@@ -187,9 +193,101 @@ public class CPU {
                 this.labelAddress = (instruction & 0x00FF0000) >>> 16;
                 ge(labelAddress);
                 break;
+            //
+            case call:
+                this.labelAddress = (instruction & 0x00FF0000) >>> 16;
+                call(labelAddress);
+                break;
+            case ret:
+                ret();
+                break;
+            case newc:
+            	this.constant = instruction & 0x0000FFFF;
+            	newc(constant);
+            	break;
+            case star:
+            	this.operand1 = (instruction & 0x00FF0000) >>> 16;
+                this.operand2 = (instruction & 0x0000FF00) >>> 8;
+                star(ERegisters.values()[operand1], ERegisters.values()[operand2]);
+            	break;
+            case ldar:
+            	this.operand1 = (instruction & 0x00FF0000) >>> 16;
+                this.operand2 = (instruction & 0x0000FF00) >>> 8;
+                ldar(ERegisters.values()[operand1], ERegisters.values()[operand2]);
+            	break;
             default:
                 break;
         }
+    }
+    private void ldar(ERegisters eTarget, ERegisters src) {
+        int srcAddress = get(src);
+        set(ERegisters.eMAR, srcAddress); // MAR <- address
+    	this.explanation += ERegisters.eMAR+" <- "+src+"("+srcAddress+")"+"\n";
+        int value = bus.load(EDeviceId.eMemory, get(ERegisters.eMAR)); // MBR <- (MAR)
+        set(ERegisters.eMBR, value);
+        this.explanation += ERegisters.eMBR+" <- ("+ERegisters.eMAR+"="+value+")"+"\n";
+        set(eTarget, get(ERegisters.eMBR)); // eTarget <- MBR
+        this.explanation += eTarget+" <- "+ERegisters.eMBR+"("+get(ERegisters.eMBR)+")"+"\n";
+        showExplanation("~LDAR) Loaded value from address " + srcAddress + " (" + value + ") into " + eTarget);
+    }
+	private void star(ERegisters dest, ERegisters eSource) {
+        int destAddress = get(dest);
+        set(ERegisters.eMAR, destAddress); // MAR <- address
+    	this.explanation += ERegisters.eMAR+" <- "+ dest+"("+destAddress+")"+"\n";
+        set(ERegisters.eMBR, get(eSource)); // MBR <- eSource
+        this.explanation += ERegisters.eMBR+" <- "+eSource+"("+get(eSource)+")"+"\n";
+        bus.store(EDeviceId.eMemory, get(ERegisters.eMAR), get(ERegisters.eMBR)); // (MAR) <- MBR
+        this.explanation += "(MAR="+String.format("0x%04X", get(ERegisters.eMAR))+")"+" <- "+ERegisters.eMBR+"("+get(ERegisters.eMBR)+")"+"\n";
+        showExplanation("~STA) Stored value of MBR: " + get(ERegisters.eMBR) + " into address of MAR: " + String.format("0x%04X",get(ERegisters.eMAR)));
+    }
+	private void newc(int size) {
+        int address = bus.allocate(EDeviceId.eMemory, size);
+        if (address != -1) {
+            pushToStack(address);
+            showExplanation("~NEWC) Allocated " + size + " bytes at address " + address);
+        } else {
+            showExplanation("~NEWC) Allocation failed. Not enough heap memory.");
+        }
+    }
+    //
+    private int stackTop = stackPointer;
+    private int baseStack = stackPointer;
+    //
+    private void call(int labelAddress) {
+        int returnAddress = get(ERegisters.ePC);
+        pushToStack(returnAddress);
+        stackCleanup();
+        set(ERegisters.ePC, labelAddress - 1);
+        this.explanation += "basePointer: "+ baseStack + "\n";
+        this.explanation += "stackTop: "+ stackTop + "\n";
+        showExplanation("~CALL) Calling function at address CS+" + labelAddress + ", return address saved: " + returnAddress);
+    }
+	private void ret() {
+		stackCleanup();
+        int returnAddress = popFromStack();
+        set(ERegisters.ePC, returnAddress);
+        showExplanation("~RET) Returning from function, jumping to address CS+" + returnAddress);
+    }
+    private void pushToStack(int value) {
+        bus.store(EDeviceId.eMemory, stackPointer, value);
+        stackTop = stackPointer;
+        stackPointer++;
+    }
+    private int popFromStack() {
+        stackPointer--;
+        stackTop = stackPointer;
+        return bus.load(EDeviceId.eMemory, stackPointer);
+    }
+    //
+    private void push(ERegisters eRegister) {
+        int value = get(eRegister);
+        pushToStack(value);
+        showExplanation("~PUSH) " + eRegister + " (" + value + ") to stack at address: " + (stackPointer - 1));
+    }
+    private void pop(ERegisters eRegister) {
+        int value = popFromStack();
+        set(eRegister, value);
+        showExplanation("~POP) " + eRegister + " (" + value + ") loaded from stack.");
     }
     private void bz(int labelAddress) {
         if (getSign()) {
@@ -233,6 +331,8 @@ public class CPU {
         int eRegister2 = get(eRegisters2);
         setZero(eRegister == eRegister2);
         setSign(eRegister < eRegister2);
+        if (eRegister == eRegister2) this.explanation += "zero flag setting: ok, state: 1"+"\n";
+        if (eRegister < eRegister2) this.explanation += "sign flag setting: ok, state: 2"+"\n";
         showExplanation("~CMP) " + eRegisters+"("+eRegister+")" + " with " + eRegisters2+"("+eRegister2+")");
     }
     private void zero(int labelAddress) {
@@ -279,7 +379,7 @@ public class CPU {
     	this.explanation += ERegisters.eMAR+" <- "+String.format("0x%04X", address)+"\n";
         int value = bus.load(EDeviceId.eMemory, get(ERegisters.eMAR)); // MBR <- (MAR)
         set(ERegisters.eMBR, value);
-        this.explanation += ERegisters.eMBR+" <- "+value;
+        this.explanation += ERegisters.eMBR+" <- ("+ERegisters.eMAR+"="+value+")"+"\n";
         set(eTarget, get(ERegisters.eMBR)); // eTarget <- MBR
         this.explanation += eTarget+" <- "+ERegisters.eMBR+"("+get(ERegisters.eMBR)+")"+"\n";
         showExplanation("~LDA) Loaded value: " + value + " into " + eTarget);
@@ -301,18 +401,17 @@ public class CPU {
         this.explanation += eTarget+" <- "+eTarget+"("+targetValue+") + "+eSource+"("+sourceValue+")"+"\n";
         showExplanation("~ADD) " + eSource +"("+sourceValue+")"+ " added to " + eTarget+"("+targetValue+")" + ". New value: " + result);
     }
-    private void push(ERegisters eRegister) {
-        int value = get(eRegister);
-        bus.store(EDeviceId.eMemory, stackPointer, value);
-        showExplanation("~PUSH) " + eRegister + "(" + value + ") to stack at address: " + (stackPointer));
-        stackPointer++;
-    }
-    private void pop(ERegisters eRegister) {
-        int value = bus.load(EDeviceId.eMemory, --stackPointer);
-        set(eRegister, value);
-        this.explanation += eRegister+" <- "+value+"\n";
-        showExplanation("~POP) " + eRegister+ "(" + get(eRegister) + ")" + " loaded from stack. value: " + value);
-    }
+    private void stackCleanup() {
+		ArrayList<Integer> stackValues= new ArrayList<>();;
+		while(stackPointer>2048) {
+			stackValues.add(popFromStack());
+		}
+		pushToStack(stackValues.get(0));
+		stackValues.remove(0);
+		for(int i = stackValues.size(); i >0; i--) {
+			pushToStack(stackValues.get(i-1));
+		}
+	}
     private void incrementPC() {
         int currentPC = get(ERegisters.ePC);
         set(ERegisters.ePC, currentPC + 1);

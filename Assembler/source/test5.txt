@@ -1,0 +1,45 @@
+.program test
+    nop
+.header
+    stack 1024
+    heap 1024
+.data
+		obj 4
+.code
+		call newObject
+		pop r0
+		move obj r0
+		
+		move r1 1
+		star r0 r1
+		move r2 4
+		add r0 r2
+		move r1 2
+		star r0 r1
+		
+		move r0 obj
+		push r0
+		move r1 3
+		push r1
+		call update
+		pop r0
+		halt
+
+update:
+		pop r1
+		pop r0
+		
+		ldar r2 r0
+		move r3 4
+		add r0 r3
+		ldar r3 r0
+		add r2 r3
+		add r2 r1
+		push r2
+		ret
+
+newObject:
+		newc 16
+		ret
+.end
+		

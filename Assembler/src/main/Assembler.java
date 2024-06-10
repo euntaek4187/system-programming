@@ -14,7 +14,7 @@ public class Assembler {
     private SymbolTable symbolTabel;
     private MainFrameGUI mainFrameGUI;
     private String binaryCodeFile = "binary/codeGeneration.txt";
-    private String assemblyCodeFileName = "test3";
+    private String assemblyCodeFileName = "test2";
     public Assembler() {
     	this.symbolTabel = new SymbolTable();
     	this.mainFrameGUI = new MainFrameGUI(binaryCodeFile, assemblyCodeFileName, symbolTabel);

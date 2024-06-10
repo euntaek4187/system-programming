@@ -14,3 +14,5 @@ public class Main {
 // ver.7 - 파일 읽는거 기반 생성 + not, and, shr 추가
 // ver.8 - 오타 수정 및 기능 오류 수정 + halt바로 종료되는거 수정, 0x표현식 정상으로 수정
 // ver.9 - 코드 보기좋게 정리 + gui initialize()로 분리
+// ver.9.1 - stack 구현 성공 - call, ret
+// ver.9.2 - heap 구현 성공 - newc, star, ldar

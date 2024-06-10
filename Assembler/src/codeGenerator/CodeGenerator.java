@@ -65,6 +65,10 @@ public class CodeGenerator {
         fileWriter.flush();
         mainFrameGUI.updateGeneratedCodeGUIState();
     }
+	public void macroExpansionConstant(int value) throws IOException {
+    	fileWriter.write("0x" + String.format("%02X", EOpcode.getOpcodeNum("newc")) + String.format("%02X", 0) + String.format("%04X", value) + "\n");
+        mainFrameGUI.updateGeneratedCodeGUIState();
+	}
     public void finish() throws IOException {
         if (fileWriter != null) {
             fileWriter.flush();

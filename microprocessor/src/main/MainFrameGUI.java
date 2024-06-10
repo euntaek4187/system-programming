@@ -30,6 +30,7 @@ public class MainFrameGUI extends JFrame {
 	JTable codeSegmentTable;
 	JTextArea dataSegmentArea;
 	JTextArea stackSegmentArea;
+	JTextArea heapSegmentArea;
 	JTextArea explanationTextArea;
 	public JButton button;
 	ArrayList<JTextField> registerTextField;
@@ -106,12 +107,18 @@ public class MainFrameGUI extends JFrame {
         
         this.stackSegmentArea = new JTextArea();
         this.stackSegmentArea.setBorder(BorderFactory.createTitledBorder(""));
+        
+        this.heapSegmentArea = new JTextArea();
+        this.heapSegmentArea.setBorder(BorderFactory.createTitledBorder(""));
+
+
 
         panel5.setBorder(BorderFactory.createTitledBorder("Memory Info"));
         panel5_1.add(new JLabel("Instruction"));
         panel5_1.add(new JLabel("Code Segment"));
         panel5_1.add(new JLabel("Data Segment"));
         panel5_1.add(new JLabel("Stack Segment"));
+        panel5_1.add(new JLabel("Heap Segment"));
         
         JScrollPane scrollPane = new JScrollPane(codeSegmentTable);
         JScrollPane scrollPane2 = new JScrollPane(dataSegmentArea);
@@ -120,6 +127,7 @@ public class MainFrameGUI extends JFrame {
         panel5_2.add(scrollPane);
         panel5_2.add(scrollPane2);
         panel5_2.add(stackSegmentArea);
+        panel5_2.add(heapSegmentArea);
 
         panel5.add(panel5_1, BorderLayout.NORTH);
         panel5.add(panel5_2, BorderLayout.CENTER);
@@ -142,6 +150,7 @@ public class MainFrameGUI extends JFrame {
 		updateCodeSegmentState();
 		updateDataSegmentState();
 		updateStackSegmentState();
+		updateHeapSegmentState();
 	}
 	public void updateExplanation() {
 		explanationTextArea.setText(cpu.getExplanation());
@@ -173,7 +182,7 @@ public class MainFrameGUI extends JFrame {
 	    if (operand1 != -1) settingText += String.format("0x%02X", operand1)+": "+cpu.getERegisterByIndex(operand1)+"\n";
 	    if (operand2 != -1) settingText += String.format("0x%02X", operand2)+": "+cpu.getERegisterByIndex(operand2)+"\n";
 	    if (constant != -1) settingText += String.format("0x%04X", constant)+": "+"value "+constant+"\n";
-	    if (storeAddress != -1) settingText += String.format("0x%04X", storeAddress)+": "+"address "+storeAddress+"\n";
+	    if (storeAddress != -1) settingText += String.format("0x%04X", storeAddress)+": "+storeAddress+"\n";
 	    if (storeOperand2 != -1) settingText += String.format("0x%02X", storeOperand2)+": "+cpu.getERegisterByIndex(storeOperand2)+"\n";
 	    if (labelAddress != -1) settingText += String.format("0x%02X", labelAddress)+": "+"CS + "+labelAddress+"\n";
 		this.instructionArea.setText(settingText);
@@ -201,5 +210,12 @@ public class MainFrameGUI extends JFrame {
 			stackState += this.memorySlot.get(i)+ "\n";
 		}
 		this.stackSegmentArea.setText(stackState);
+	}
+	private void updateHeapSegmentState() {
+		String heapState = "";
+		for (int i = memory.getHeapSegmentStart(); memorySlot.get(i) != -1; i=i+4) {
+			heapState += i+": "+this.memorySlot.get(i)+ "\n";
+		}
+		this.heapSegmentArea.setText(heapState);
 	}
 }
